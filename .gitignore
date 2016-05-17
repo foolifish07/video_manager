@@ -1,0 +1,6 @@
+# backend
+/front_end/node_modules
+
+# front end 
+/video_manager/node_modules
+/video_manager/public

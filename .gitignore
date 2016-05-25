@@ -1,7 +1,7 @@
-# backend
+# front end
 /front_end/node_modules
 # /front_end/dist
 
-# front end 
+# back end 
 /video_manager/node_modules
-/video_manager/public
+/video_manager/public/files/*

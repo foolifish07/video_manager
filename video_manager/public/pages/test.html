@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My webpack vue</title>
+
+    <!--link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css"-->
+    <!--link rel="stylesheet" href="http://wiki.jikexueyuan.com/project/bootstrap4/dist/css/bootstrap.min.css">
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script-->
+    <script src="/javascripts/jquery.js"></script>
+
+
+     <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+</head>
+<body>
+  
+
+  <!--div>  
+    <div class="container-fluid" style="background-color: #e3f2fd;">
+      <div class="container">
+        
+      <nav class="navbar navbar-light" >
+        <a class="navbar-brand" href="#">Video manager</a>
+        <ul class="nav navbar-nav pull-right">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Help</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Log</a>
+          </li>
+        </ul>
+      </nav>
+      </div>
+    </div>
+
+    <h1> User register</h1>
+    <form action="/user/register" method="post">
+      <input type="email" name="email"></input>
+      <input type="password" name="password"></input>
+      <input type="submit" value="submit"></input>
+    </form>
+    
+    <h1> User login</h1>
+    <form action="/user/login" method="post">
+      <input type="email" name="email"></input>
+      <input type="password" name="password"></input>
+      <input type="submit" value="submit"></input>
+    </form>
+
+    <h1>Log out</h1>
+    <form action="/user/logout" method="post">
+      <input type="submit" value="submit"></input>
+    </form>  
+
+    <h1>Get User info</h1>
+    <form action="/user/myinfo" method="get">
+      <input type="submit" value="submit"></input>
+    </form>  
+
+    <h1>Update User info</h1>
+    <form action="/user/myinfo" method="post">
+      <input type="text" name="name"></input>
+      <input type="text" name="group"></input>
+      <input type="password" name="newpassword"></input>
+      <input type="password" name="oldpassword"></input>
+      <input type="submit" value="submit"></input>
+    </form> 
+
+    <h1> VIdeo </h1>
+    <form action="/api/video/upload" method="POST" enctype="multipart/form-data">
+      Select an image to upload:
+
+      <input type="file" name="file1" >
+      <input type="file" name="file2" webkitdirectory>
+      <input type="submit" value="Upload Image">
+    </form>
+
+    <img src="/files/mov_bbb.mp4">
+    <video width="320" height="240" controls="controls">
+      <source src="/files/mov_bbb.mp4" type="video/ogg">
+      <source src="/files/mov_bbb.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+  </div-->
+
+  <ul id="messages"></ul>
+  <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+  </form>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">  
+    //var socket = io('http://localhost');
+    var socket = io();
+    $('form').submit(function(){
+      socket.emit('chat', $('#m').val());
+      $('#m').val('');
+      return false;
+    });
+    socket.on('chat', function(msg){
+      console.log(msg);
+      $('#messages').append($('<li>').text(msg));
+    });
+  </script>
+
+</body>
+</html>

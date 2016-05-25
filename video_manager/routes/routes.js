@@ -20,9 +20,13 @@ router.get('/test', function(req, res, next){
 	res.sendFile(test_path);
 })
 
-var index_path = path.join(__dirname, '..', 'public', 'pages', 'index.html');
+// index.html
 router.get('/', function(req, res, next){
-	res.sendFile(index_path);
+	res.sendFile( path.join(__dirname, '..', 'public', 'pages', 'index.html') );
+})
+// main.js
+router.get('/main.js', function(req, res, next){
+	res.sendFile( path.join(__dirname, '..', 'public', 'pages', 'main.js') );
 })
 
 

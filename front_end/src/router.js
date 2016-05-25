@@ -1,8 +1,13 @@
+import VueRouter from 'vue-router'
+import Vue from 'vue'
+
 import App from './App.vue'
 
 import Index from './components/Index.vue'
 import LoginRegister from './components/LoginRegister.vue'
 import Video from './components/Video.vue'
+import Panel from './components/Videopanel.vue'
+import Chat from './components/Chat.vue'
 
 import Manager from './components/Manager.vue'
 import Info from './components/Manager/Info.vue'
@@ -10,7 +15,25 @@ import Videos from './components/Manager/Videos.vue'
 import Tags from './components/Manager/Tags.vue'
 import Upload from './components/Manager/Upload.vue'
 
-export default {
+Vue.use(VueRouter);
+let router = new VueRouter();
+
+router.beforeEach(function (transition) {
+    console.log('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww');
+    console.log(transition.to.path);
+    if (transition.to.path === '/nothing') {
+        transition.abort();
+    }     else {
+        transition.next()
+    }
+})
+
+
+let route_path = {
+    
+    '/chat' : {
+        component: Chat,
+    },
     '/': {
         component: App,
         subRoutes: {
@@ -26,28 +49,36 @@ export default {
                 name: 'login',
                 component: LoginRegister,
             },
-            'manager': {
+            '/manager': {
                 name: 'manager',
                 component: Manager,
                 subRoutes: {
-                    'info' : {
+                    '/home': {
+                        name: 'home',
+                        component: Panel,
+                    },
+                    '/info' : {
                         name: 'info',
                         component: Info,
                     },
-                    'videos' : {
+                    '/videos' : {
                         name: 'videos',
                         component: Videos,
                     },
-                    'tags' : {
+                    '/tags' : {
                         name: 'tags',
                         component: Tags,
                     },
-                    'upload' : {
+                    '/upload' : {
                         name: 'upload',
-                        component: Upload
+                        component: Upload,
                     }
                 }
-            }
+            },
         }
     }
 }
+
+router.map( route_path )
+
+export default router

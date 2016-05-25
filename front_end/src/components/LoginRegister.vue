@@ -30,6 +30,7 @@
 </template>
 
 <script>
+  import client from '../client.js' 
 
 	export default {
 		data() {
@@ -81,27 +82,19 @@
           // login 
 
           if ( post_data.email && post_data.password ){
-            $.ajax({
-              type: "post",
-              url: '/api/user/login',
-              cache: false,
-              async: true, 
-              data: post_data,
-              dataType: 'json',
-              success: function(data){
-                console.log(data);
 
-                if ( data.status=='success' ){
-                  router.go({ name: 'info' })
-                }
-                else if (data.status=='wrong') {
-                  rt.passwordWrong = true;
-                }
-                else {
-                  rt.noSuchUser = true;
-                }
-              }
-            });
+            client.user.login(
+              function(data){
+                router.go({ name: 'info', query: {change_state: true} })
+              },
+              function(data){
+                rt.noSuchUser = true;
+              },
+              function(data){
+                rt.passwordWrong = true;
+              }, 
+              post_data );
+
           }
 
         }
@@ -109,26 +102,16 @@
           // register 
 
           if ( post_data.email && post_data.password ){
-            $.ajax({
-              type: "post",
-              url: '/api/user/register',
-              cache: false,
-              async: true, 
-              data: post_data,
-              dataType: 'json',
-              success: function(data){
-                console.log(data);
+            client.user.register(
+              function(data){
+                router.go({ name: 'info', query: {change_state: true} })
+              },
+              function(data){
+                rt.emailRegistered = true;
+              }, 
+              post_data );
 
-                if ( data.status=='success' ){
-                  router.go({ name: 'info' });
-                }
-                else {
-                  rt.emailRegistered = true;
-                }
-              }
-            });
           }
-
 
         }
       }

@@ -22,7 +22,7 @@
     </div>
     <div class="form-group row">
       <label class="form-control-label">register time:</label>
-      <label class="form-control-label">{{ register_time }}</label>
+      <label class="form-control-label">{{ new Date(Date.parse(register_time)) }}</label>
     </div>
 
     <div class="form-group row">
@@ -53,8 +53,9 @@
 </template>
 
 <script>
+  import client from '../../client.js'
 
-	export default {
+  export default {
     
     created: function(){
       this.get_info();
@@ -76,61 +77,47 @@
         var router = this.$router;
         var rt = this;
 
-        $.ajax({
-          type: "get",
-          url: '/api/user/myinfo',
-          cache: false,
-          async: true, 
-          data: {},
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
-
-            if ( data.status=='success' ){
-              data = data.data;
-              rt.email = data.email;
-              rt.name = data.name;
-              rt.group = data.group;
-              rt.register_time = data.register_time;
-            }
-            else if ( data.status=='login_required' ){
-              router.go({ name: 'login'});
-            }
-          }
-        });
+        client.user.get_myinfo(
+          function(data){
+            rt.email = data.email;
+            rt.name = data.name;
+            rt.group = data.group
+            rt.register_time = data.register_time;
+          },
+          function(data){
+            router.go({ name: 'login' });
+          })
     	},
     	post_info: function(){
+        var router = this.$router;
         var rt = this;
 
         var post_data = {};
         if ( this.name!='' )
           post_data.name = this.name;
-        if ( this.newpassword!='')
+        if ( this.newpassword && this.newpassword!='')
           post_data.newpassword = this.newpassword;
-        if ( this.oldpassword!='' )
+        if ( this.oldpassword && this.oldpassword!='' )
           post_data.oldpassword = this.oldpassword;
 
         rt.password_wrong = false;
 
         if ( this.oldpassword ){
-          $.ajax({
-            type: "patch",
-            url: '/api/user/myinfo',
-            cache: false,
-            async: true, 
-            data: post_data,
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
+          client.user.patch_myinfo(
+            function(data){
+              rt.email = data.email;
+              rt.name = data.name;
+              rt.group = data.group
+              rt.register_time = data.register_time;
+            },
+            function(data){
+              router.go({ name: 'login' })
+            },
+            function(data){
+              rt.password_wrong = true;
+            },
+            post_data );
 
-              if ( data.status=='success' ){
-                rt.get_info();
-              }
-              else {
-                rt.password_wrong = true;
-              }
-            }
-          })
         }
     	},
     },

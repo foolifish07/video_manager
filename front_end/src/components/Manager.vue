@@ -7,7 +7,7 @@
   <!-- Left -->
   <div class="col-sm-3">
     <div class="list-group" >
-      <a href="#" class="list-group-item list-group-item-info">Home</a>
+      <a v-link="{name: 'home'}" class="list-group-item list-group-item-info">Home</a>
       <a v-link="{name: 'info'}" class="list-group-item list-group-item-info">Info</a>
       <a v-link="{name: 'videos'}" class="list-group-item list-group-item-warning">Videos</a>
       <a v-link="{name: 'tags'}" class="list-group-item list-group-item-warning">Tags</a>
@@ -28,6 +28,7 @@
 </template>
 
 <script>
+  import client from '../client.js'
 
 	export default {
     created: function(){
@@ -41,42 +42,15 @@
       logout: function(){
         let router = this.$router;
 
-        $.ajax({
-          type: "post",
-          url: '/api/user/logout',
-          cache: false,
-          async: true, 
-          data: {},
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
-
-            if ( data.status=='success' ){
-              // go to ...
-              router.go({ name: 'index' })
-            }
-          }
-        });
-
+        client.user.logout(function(data){
+          router.go({ name: 'index', query: { change_state: true }});
+        })
       },
       logged: function(){
         let router = this.$router;
-        $.ajax({
-          type: "get",
-          url: '/api/user/logged',
-          cache: false,
-          async: true, 
-          data: {},
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
-
-            if ( data.status=='not_logged' ){
-              // go to ...
-              router.go({ name: 'login' })
-            }
-          }
-        });
+        client.user.logged(null, function(data){
+          router.go({ name: 'login' });
+        })
       }
     },
 	}

@@ -9,43 +9,19 @@
     </div>
   </div>
 
-
   <div class="container">
-    
-    <h3> More videos </h3>  
-
-    <!-- tables -->
-    <div style="margin-top: 10px">
-      <table class="table table-hover">
-        <thead class="thead-default">
-          <tr>
-            <th>Name</th>
-            <th>Watched</th>
-            <th>Download</th>
-            <th>upload Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template v-for="item in videos" track-by="$index">
-            <tr>
-              <th scope="row"><button class="btn btn-link btn-sm">{{ item.name }} </button> </th>
-              <td>{{ item.watched_times }}</td>
-              <td>{{ item.download_times }}</td>
-              <td>{{ item.upload_time }}</td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-    </div>
+    <panel></panel>
   </div>
+
 
 </template>
 
 <script>
+  import client from '../client.js'
+  import Panel from './Videopanel.vue'
 
 	export default {
     created: function(){
-      this.get_public_videos();
     },
 		data() {
 			return {
@@ -53,31 +29,53 @@
       } 
 		},
     methods: {
-      get_public_videos: function(){
-        let videos = this.videos;
-        $.ajax({
-          type: "get",
-          url: '/api/videos/public',
-          cache: false,
-          async: true, 
-          data: {},
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
-
-            if ( data.status=='success' ){
-              videos.splice(0, videos.length);
-              for(let i in data.vjdesk ){
-                videos.push(data.videos[i]);
-              }
-            }
-          }
-        });
-      }
+      
     },
+    components: {
+      Panel,
+    }
 	}
 </script>
 
 <style type="text/css">
+.video-item {
+  margin: 5px;
+  width: 200px;
+  height: 180px;
+
+  transition: 0.3s ease-in;
+}
+.video-item:hover {
+  color: #0B5F96;
+  cursor:pointer;
+}
+
+.video-item-play {
+  width: 100%;
+  height: 150px;
+/*  background-color: #aaaaaa;*/
+  opacity: 0;
+
+  transition: 0.3s ease-in;
+} 
+.video-item-play:hover {
+  opacity: 0.5;
+}
+
+.video-background{
+  width: 100%;
+  height: 150px;
+  background-repeat:no-repeat;
+  background-size: 100% 100%;
+  /*background-attachment:fixed;*/
+  /*background-image:url("/images/play.png");*/
+  background-position:center center;
+
+  transition: 0.3s ease-in;
+} 
+
+.video-background:hover{
+  background-size: 120% 120%;
+} 
 
 </style>

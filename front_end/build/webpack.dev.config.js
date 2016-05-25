@@ -20,6 +20,44 @@ config.devServer= {
 		      	//req.url = req.url.replace( /^\/data/, 'Contest/715/balloon/data/');
 		    },
         },
+        '/stylesheets/*': {
+	    	target: 'http://localhost:3000',
+	        secure: false,
+	        rewrite: function(req) {
+		      	//req.url = req.url.replace( /^\/data/, 'Contest/715/balloon/data/');
+		    },
+        },
+        '/javascripts/*': {
+	    	target: 'http://localhost:3000',
+	        secure: false,
+	        rewrite: function(req) {
+		      	//req.url = req.url.replace( /^\/data/, 'Contest/715/balloon/data/');
+		    },
+        },
+        '/images/*': {
+	    	target: 'http://localhost:3000',
+	        secure: false,
+	        rewrite: function(req) {
+		      	//req.url = req.url.replace( /^\/data/, 'Contest/715/balloon/data/');
+		    },
+        },
+
+        '/files/*': {
+	    	target: 'http://localhost:3000',
+	        secure: false,
+	        rewrite: function(req) {
+	        	console.log('files')
+		      	//req.url = req.url.replace( /^\/data/, 'Contest/715/balloon/data/');
+		    },
+        },
+        '/socket.io/*': {
+        	target: 'http://localhost:3000',
+	        secure: false,
+	        rewrite: function(req) {
+	        	console.log('socketio')
+		      	//req.url = req.url.replace( /^\/data/, 'Contest/715/balloon/data/');
+		    },	
+        }
     }
 },
 config.plugins = [

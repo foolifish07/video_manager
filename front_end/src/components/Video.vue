@@ -3,18 +3,18 @@
 
 <div class="container"  style="margin-top: 15px">
 
-  <video width="100%" controls="controls"
-    class="center-block">
-    <source v-bind:src="video_url" type="video/mp4" />
+  <video width="100%" controls="controls"class="center-block"
+    v-bind:src="video.video_url" >
   </video>
   <!--embed src="http://yuntv.letv.com/bcloud.swf" allowFullScreen="true" quality="high"  width="640" height="360" align="middle" allowScriptAccess="always" flashvars="uu=vhrrkr9rtg&vu=1310d79733&auto_play=1&gpcflag=1&width=640&height=360" type="application/x-shockwave-flash"></embed-->
   <div class="video-info">
     <div>
       <label class="lead">{{ video.name }} </label> 
-      <small> upload on {{ video.upload_time }}</small>
+      <small> upload on {{ new Date(Date.parse(video.upload_time )) }}</small>
       By
       <Strong>  {{ video.creator.name }}</strong>
-      <button class="btn btn-primary btn-sm pull-right"> download </button>
+      <a class="btn btn-primary btn-sm pull-right" 
+        v-bind:href=" '/api/video/download/' + video.storage_name"> download </a>
     </div>
     <label>watched: {{ video.watched_times }} times,
           download: {{  video.download_times }} times
@@ -23,7 +23,7 @@
   </div>
 
   <div style="margin-top: 15px" v-show="can_manage">
-    
+    <h3> Manage panel </h3>
     <table class="table" style="margin-top: 15px">
       <tbody>
         <tr>
@@ -37,7 +37,7 @@
         </tr>
         <tr>
           <th>Creator: </th>
-          <th>{{ video.creator.name }}</th>
+          <th>{{ video.creator.name }}({{ video.creator.email }})</th>
         </tr>
         <tr>
           <th> Stats: </th>
@@ -47,7 +47,8 @@
         </tr>
         <tr>
           <th>image url</th>
-          <th>{{ video.img_url?video.img_url:'No' }} </th>
+          <th style="max-width: 200px; word-wrap: break-word;">
+            {{ video.img_url?video.img_url:'No' }} </th>
         </tr>
         <tr>
           <th>Watched: </th>
@@ -58,16 +59,12 @@
           <th>{{ video.download_times }}</th>
         </tr>
         <tr>
-          <th>Download: </th>
-          <th>{{ video.download_times }}</th>
-        </tr>
-        <tr>
           <th>Tags:</th>
           <th>
-            <template v-for="videotag in videotags" track-by="$index">
+            <template v-for="videotag in video.tags" track-by="$index">
               <a class="label label-pill label-danger btn" style="margin-right: 5px"
                 v-on:click="delete_videotag(videotag)" title="delete this tag"> 
-                {{ videotag.tag.name }} </a>
+                {{ videotag.name }} </a>
             </template>
           </th>
           <th>
@@ -86,7 +83,8 @@
 
 </template>
 
-<script>
+<script> 
+  import client from '../client.js'
 
 	export default {
     created: function(){
@@ -104,10 +102,11 @@
           download_times: 0,
           watched_times: 0,
           img_url: '',
+          video_url: '',
           creator: { name: ''},
+          tags: [],
         },
         tags :[],
-        videotags: [],
 
         new_name: '',
       } 
@@ -118,170 +117,99 @@
         let router = this.$router;
         let rt = this;
 
-        $.ajax({
-          type: "get",
-          url: '/api/video/' + route.params.hash,
-          cache: false,
-          async: true, 
-          data: {},
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
-
-            if ( data.status=='can_manage' ){
-              rt.can_manage = true;
-              rt.video = data.data;
-              rt.get_videotags();
-            }
-            else if ( data.status=='success' ){
-              rt.can_manage = false;
-              rt.video = data.data;
-            }
-            else {
-              router.go({ name: 'index'});
-            }
-            
-          }
-        });
+        client.video.get_video(
+          route.params.hash,
+          function(data){
+            rt.video = data;
+            rt.video_url = data.video_url;
+          },
+          function(data){
+            router.go({ name: 'index' })
+          },
+          function(data){
+            router.go({ name: 'index' })
+          });
 
       },
       get_tags: function(){
+        let rt = this;
         let router = this.$router;
         let tags = this.tags;
 
-        $.ajax({
-          type: "get",
-          url: '/api/tags/',
-          cache: false,
-          async: true, 
-          data: {},
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
+        client.tags.get_mytags(
+          function(data){
+            tags.splice(0, tags.length);
+            for(let i in data)
+              tags.push( data[i] );
 
-            if ( data.status=='success' ){
-              data = data.data;
-              tags.splice(0, tags.length);
-              for(let i in data){
-                tags.push( data[i] );
-
-              }
-            }
-          }
-        });
-      },
-      get_videotags: function(){
-        let videoid = this.video._id;
-        let videotags = this.videotags;
-          $.ajax({
-            type: "get",
-            url: '/api/videotag/',
-            cache: false,
-            async: true, 
-            data: { videoid: videoid },
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
-
-              if ( data.status=='success' ){
-                data = data.data;
-                videotags.splice(0, videotags.length);
-                data.forEach(function(ele, index, arr){
-                  videotags.push(ele);
-                })
-              }
-            }
-          });  
+            rt.can_manage = true;
+          },
+          function(data){
+            tags.splice(0, tags.length);
+            // router.go({ name: 'index' });
+          })
       },
 
-      delete_videotag: function(videotag){
-        let videotags = this.videotags;
+      delete_videotag: function(index){
+        let rt = this;
+        let video = this.video;
+        let tags = video.tags;
+        tags.splice(index, 1);
+        client.video.patch_video(
+          video.storage_name,
+          function(data){
+          }, null, null,
+          {tags: JSON.stringify(tags) });
+  
+      },
 
-        if ( videotag && videotag._id ){        
-          $.ajax({
-            type: "delete",
-            url: '/api/videotag/',
-            cache: false,
-            async: true, 
-            data: { id: videotag._id },
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
 
-                for(let i in videotags){
-                  if ( videotags[i]._id == videotag._id ){
-                    videotags.splice(i, 1);
-                    break;
-                  }
-                }
-            }
-          });        
+      add_videotag: function(tag){
+        
+        var video = this.video;
+        var tags = video.tags
+        var has_tag = tags.some(function(ele, index, arr){
+          return ele._id == tag._id;
+        })
+        if ( !has_tag ){
+          tags.push( tag ); 
+          client.video.patch_video(
+            video.storage_name,
+            function(data){
+
+            }, null, null, 
+            {tags: JSON.stringify(tags) })
         }
       },
-      add_videotag: function(tag){
-        if ( !this.video.videotag )
-          this.video.videotag = [];
-        var video = this.video;
-        var videotags = this.videotags;
-
-        $.ajax({
-          type: "post",
-          url: '/api/videotag/',
-          cache: false,
-          async: true, 
-          data: { tagid: tag._id, videoid: video._id },
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
-
-            if ( data.status=='success' ){
-              data = data.data;
-              data.tag = tag;
-              videotags.push( data );
-            }
-          }
-        });
-      },
-
       change_name: function(){
-        let item = this.video;
-        let new_name = this.new_name
+        let video = this.video;
+        let new_name = this.new_name;
 
-        if ( item && new_name ){
-          $.ajax({
-            type: "patch",
-            url: '/api/video' + '/' + item.storage_name,
-            cache: false,
-            async: true, 
-            data: { newname: new_name },
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
-              item.name = new_name;
-            }
-          });
-          
+        if ( video && new_name ){
+          client.video.patch_video(
+            video.storage_name,
+            function(data){
+              video.name = new_name;
+            }, null, null, 
+            { newname: new_name } );
+
         }
       },
       change_state: function(){
-        let item = this.video;
+        let video = this.video;
+        let rt = this;
 
-        if ( item && item.storage_name ){
-          $.ajax({
-            type: "patch",
-            url: '/api/video' + '/' + item.storage_name,
-            cache: false,
-            async: true, 
-            data: { is_public: !item.is_public },
-            dataType: 'json', 
-            success: function(data){
-              console.log(data);
-              item.is_public = !item.is_public
-            }
-          });
+        if ( video && video.storage_name ){
+          client.video.patch_video(
+            video.storage_name,
+            function(data){
+              video.is_public = !video.is_public;
+            }, null, null, 
+            { is_public: !video.is_public } );
           
         }
       },
+
     },
   }
 </script>

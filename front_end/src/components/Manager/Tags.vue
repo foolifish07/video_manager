@@ -48,7 +48,7 @@
 </template>
 
 <script>
-
+  import client from '../../client.js' 
 
 	export default {
     created: function(){
@@ -67,78 +67,65 @@
         let router = this.$router;
         let tags = this.tags;
 
-        $.ajax({
-          type: "get",
-          url: '/api/tags/',
-          cache: false,
-          async: true, 
-          data: {},
-          dataType: 'json',
-          success: function(data){
-            console.log(data);
-
-            if ( data.status=='success' ){
-              data = data.data;
-              tags.splice(0, tags.length);
-              for(let i in data)
-                tags.push( data[i] );
-            }
-            else if ( data.status=='login_required' ){
-              router.go({ name: 'login'});
-            }
-          }
-        });
+        client.tags.get_mytags(
+          function(data){
+            tags.splice(0, tags.length);
+            for(let i in data)
+              tags.push( data[i] );
+          },
+          function(data){
+            router.go({ name: 'index'} );
+          })
       },
 
       new_tag: function(){
-        let rt = this;
+        let router = this.$router;
+        let tags = this.tags;
         let post_data = {
           name: this.tag,
         }
+
         if ( this.tag ){
-          $.ajax({
-            type: "post",
-            url: '/api/tag',
-            cache: false,
-            async: true, 
-            data: post_data,
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
-              rt.get_tags();
-            }
-          });
+          client.tag.new(
+            function(data){
+              tags.push(data);
+            },
+            function(data){
+              router.go({ name: 'index' })
+            },
+            post_data)
         }
       },
       delete_tag: function(item){
-          let rt = this;
-          $.ajax({
-            type: "delete",
-            url: '/api/tag',
-            cache: false,
-            async: true, 
-            data: { tagid: item._id },
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
-              rt.get_tags();
-            }
-          });
+          let router = this.$router;
+          let tags = this.tags;
+          let index = tags.indexOf(item);
+
+          client.tag.delete(
+            function(data){
+              tags.splice(index, 1);
+            },
+            function(data){
+              router.go({ name: 'index' })
+            },
+            { tagid: item._id})
+
       },
       change_name: function(item){
+        let router = this.$router;
+        let tags = this.tags;
+        let index = tags.indexOf(item);
+
         if ( item.new_name ){
-          $.ajax({
-            type: "patch",
-            url: '/api/tag',
-            cache: false,
-            async: true, 
-            data: { tagid: item._id, name: item.new_name},
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
-              item.name = item.new_name;
-            }
-          }); 
+          client.tag.rename(
+            function(data){
+              tags.splice(index, 1, data);
+            },
+            function(data){
+              router.go({ name: 'index' })
+            },
+            { tagid: item._id, name: item.new_name} )
+
         }
       },
 

@@ -2,33 +2,32 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
 // models
-var VideoTag = require('./VideoTag');
+//var Comment = require('./Comment');
 
 var schema = new mongoose.Schema({
-  name: String,
-  creator: { type: ObjectId, ref: 'User' },
   storage_name: String,
+
+  name: String,
   is_public: { type: Boolean, default: false },
+  tags: [{ type: ObjectId, ref: 'Tag', default: [] }],
+  comments: [{ type: ObjectId, ref: 'Comment', default: [] }],
+  
+  creator: { type: ObjectId, ref: 'User' },
   upload_time: { type: Date, default: Date.now },
-
-  format: { type: String, default: '' },
-  duration: { type: Number, default: 0 },
-
-  videotag: [{ type: ObjectId, ref: 'VideoTag', default: [] }],
-  img_url: { String, default: ''},
-  video_url: { String, default:'' },
-
+  videoid: { type: Number, default: 0 }, 
+  img_url: { type: String, default: '' },
+  video_url: { type: String, default:'' },
   watched_times: { type: Number, default: 0 },
   download_times: { type: Number, default: 0 }, 
 });
 
 // new 
-schema.statics.newOne = function(name, creator, storage_name, img_url, callback){
+schema.statics.newOne = function(storage_name, name, creatorid, videoid, callback){
 	var data = {
-		name: name,
-		creator: creator._id,
 		storage_name: storage_name,
-    img_url: img_url,
+    name: name,
+    creator: creatorid,
+    videoid: videoid,
     video_url: '/files/' + storage_name,
 	};
 	return this.create(data, callback);
@@ -40,8 +39,7 @@ schema.statics.findOneByHash = function(hash, callback) {
         .findOne({ storage_name: hash })
         .populate( 'creator' )
         .populate({
-            path: 'videotag',
-            populate: { path: 'tag' }
+            path: 'tags',
          })
         .exec( callback );
 }
@@ -50,8 +48,7 @@ schema.statics.findByCreator = function(creatorid, callback){
         .find({creator: creatorid })
         .populate( 'creator' )
         .populate({
-            path: 'videotag',
-            populate: { path: 'tag' }
+            path: 'tags',
          })
         .exec( callback );
 }
@@ -60,8 +57,7 @@ schema.statics.findByPublic = function( callback ){
         .find({ is_public: true })
         .populate( 'creator' )
         .populate({
-            path: 'videotag',
-            populate: { path: 'tag' }
+            path: 'tags',
          })
         .exec( callback )
 }
@@ -74,31 +70,38 @@ schema.statics.removeOne = function(hash, callback) {
 
 // update 
 schema.statics.updateOne = function(hash, item, callback){
-    return this.update( 
+    return this.findOneAndUpdate( 
         { storage_name: hash }, 
         item, 
+        { new: true },
         callback );
 }
-schema.statics.updatePublic = function(hash, newv ,callback){
-    return this.update( 
+schema.statics.updatePublic = function(hash, newv, callback){
+    return this.findOneAndUpdate( 
         { storage_name: hash }, 
         { is_public: newv }, 
-        {},
+        { new: true },
         callback );
 }
 schema.statics.updateWatched = function(hash, newv, callback){
-    return this.update(
-        { storage_name: hash }, 
-        { watched_times: newv },
-        {},
-        callback );
-}
-schema.statics.updateDownload = function(hash, newv, callback){
     return this.findOneAndUpdate(
         { storage_name: hash }, 
-        { download_times: newv },
-        {},
+        { watched_times: newv },
+        { new: true },
         callback );
+}
+schema.statics.updateDownload = function(hash){
+    this.findOneAndUpdate(
+        { storage_name: hash }, 
+        { },
+        { new: false },
+        function(err, video){
+          if ( err ) console.log(err);
+          else {
+            video.download_times++;
+            video.save();
+          }    
+        });
 }
 
 var Model = mongoose.model('Video', schema);

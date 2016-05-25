@@ -1,16 +1,12 @@
 var router = require('express').Router();
 
 // tools 
-var path = require('path');
 function packed(status, data){
 	return { status: status, data: data } 
 }
 
 // models 
 var User = require('../mongodb/User');
-
-// session 
-var session = require('../session');
 
 // status in all 
 var server_res = {
@@ -56,10 +52,10 @@ var server_res = {
 		},
 		patch: {
 			success: function(data){
-				return packed('success', '');
+				return packed('success', data);
 			},
 			passwordwrong: function(data){
-				return packed('wrong', '');
+				return packed('wrong', data);
 			},
 		}
 	}
@@ -117,7 +113,7 @@ router.post('/register', function(req, res, next) {
 								print.register.newone();
 							}
 							else{
-								session.login(req, user);
+								req.session.user = user;
 
 								res.json( server_res.register.success() );
 							}
@@ -144,7 +140,7 @@ router.post('/login', function(req, res, next){
 			else {
 				if ( user ){
 					if ( user.password===password ){
-						session.login(req, user);
+						req.session.user = user;
 
 						res.json( server_res.login.success() );
 					}
@@ -158,7 +154,7 @@ router.post('/login', function(req, res, next){
 // log out 
 router.post('/logout', function(req, res, next){
 	
-	session.logout(req);
+	req.session.user = null;
 
 	res.json( server_res.logout.success() );
 });
@@ -179,7 +175,7 @@ router.get('/logged', function(req, res, next){
 router.route('/myinfo')
 	.all(function(req, res, next){
 
-		if ( session.is_logged_in(req) )
+		if ( req.session.user )
 			next();
 		else 
 			res.json( server_res.myinfo.login_required() );
@@ -194,19 +190,21 @@ router.route('/myinfo')
 
 		var oldpassword = req.param('oldpassword');
 		var user = req.session.user;
-		if ( req.param('name') )
-			user.name = req.param('name');
-		if ( req.param('group') )
-			user.group = req.param('group');
 
 		if ( user.password===oldpassword ){
-			user.password = req.param('newpassword');
+			
+			if ( req.param('name') )
+				user.name = req.param('name');
+			if ( req.param('group') )
+				user.group = req.param('group');
+			if ( req.param('newpassword') )
+				user.password = req.param('newpassword');
 
 			User.updateOthers(user.email, user, function(err, item){
 				if ( err ){
 					print.myinfo.patch.updateother();
 				}
-				else res.json( server_res.myinfo.patch.success() );
+				else res.json( server_res.myinfo.patch.success(item) );
 			})
 		}
 		else res.json( server_res.myinfo.patch.passwordwrong() );

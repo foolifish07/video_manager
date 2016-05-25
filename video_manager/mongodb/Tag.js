@@ -8,10 +8,10 @@ var schema = new mongoose.Schema({
 });
 
 // new 
-schema.statics.newOne = function(name, creator, callback){
+schema.statics.newOne = function(name, creatorid, callback){
 	var data = {
 		name: name,
-		creator: creator,
+		creator: creatorid,
 	}
 	return this.create(data, callback) 
 }
@@ -40,6 +40,7 @@ schema.statics.updateName = function(id, name, callback){
 	return this.findOneAndUpdate(
 		{ _id: id }, 
 		{ name: name },
+		{ new: true },
 		callback );
 }
 

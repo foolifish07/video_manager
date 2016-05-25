@@ -1,5 +1,6 @@
 # backend
 /front_end/node_modules
+/front_end/dist
 
 # front end 
 /video_manager/node_modules

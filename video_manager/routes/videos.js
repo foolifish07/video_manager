@@ -1,10 +1,8 @@
 var router = require('express').Router();
 
-// Tools 
-var path = require('path');
-function packed(status, data){
-	return { status: status, data: data } 
-}
+// status 
+var status = require('../status').status;
+var login_required = require('../status').login_required;
 
 // models
 var Video = require('../mongodb/Video');
@@ -14,38 +12,22 @@ var VideoTag = require('../mongodb/VideoTag');
 var session = require('../session');
 
 router.get('/public', function(req, res, next){
-	var status = {
-		success: 'success',
-	}
+
 	Video.findByPublic( 
 		function(err, videos){
 			if ( err ) {
 				console.log("mongoose : public err")
 			}
 			else {
-				res.json( packed( status.success, videos) );
+				status.success(res, videos); // return 
 			}
 		});
 })
-router.get('/mine', function(req, res, next){
-	var status = {
-		success: 'success',
-	}
-	var user = req.session.user;
+router.get('/mine', 
+	login_required, // return 
+	function(req, res, next){
 
-	if ( req.param('tagid') ){
-		VideoTag.findByTag(
-			req.param('tagid'),
-			function(err, videos){
-				if ( err ){
-					console.log("");
-				}
-				else {
-					res.json( packed(status.success, videos) );
-				}
-			});
-	}
-	else {
+		var user = req.session.user;
 		if ( user ){
 			Video.findByCreator(
 				user._id, 
@@ -54,12 +36,11 @@ router.get('/mine', function(req, res, next){
 						console.log("mongoose : public err")
 					}
 					else {
-						res.json( packed( status.success, videos) );
+						status.success(res, videos); // return 
 					}
 				})
 		}
-	}
 
-})
+	})
 
 module.exports = router;

@@ -10,45 +10,29 @@ function packed(status, data){
 var Tag = require('../mongodb/Tag');
 var VideoTag = require('../mongodb/VideoTag');
 
-// session
-var session = require('../session');
+var status = require('../status').status;
+var login_required = require('../status').login_required;
 
-router.get('/', function(req, res, next){
-	var status = {
-		success: 'success',
-		login_required: 'login_required'
-	}
+router.get('/', 
+	login_required, // return 
+	function(req, res, next){
 
-	var user = req.session.user;
+		var user = req.session.user;
+		if ( user ){
 
-	if ( req.param('videoid') ){
-		VideoTag.findByVideo(
-			req.param('videoid'), 
-			function(err, videotags){
-				if ( err ) {
-					console.log("mongoose : public err")
-				}
-				else {
-					res.json( packed( status.success, videotags) );
-				}
-			});
-	}
-	else if ( user ){
+			Tag.findByCreator(
+				user._id, 
+				function(err, tags){
+					if ( err ) {
+						console.log('mongoose : tag findByCreator err ');
+					}
+					else {
+						status.success(res, tags);
+					}
+				});
+		}
 
-		Tag.findByCreator(
-			user._id, 
-			function(err, tags){
-				if ( err ) {
-					console.log('mongoose : tag findByCreator err ');
-				}
-				else {
-					res.json( packed(status.success, tags) );
-				}
-			});
-	}
-	else res.json( packed(status.login_required,'') );
-
-})
+	})
 
 
 module.exports = router;

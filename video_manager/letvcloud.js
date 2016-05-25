@@ -15,7 +15,7 @@ var get_video_list = function(){
 
 var get_image = function(videoid, size, callback){
     videoid = videoid ? videoid : 29037364;
-	size = size ? size : '100_100';
+	size = size ? size : '200_150';
 
 	// data.data.img1;
 	letvcloud.image.get({video_id: videoid, size: size}, function(err, data){
@@ -50,6 +50,8 @@ upload_test('hehe', './public/files/mov_bbb.mp4', function(err, data){
 	console.log(data);
 });
 */
+
+//get_image(29303630, null, function(){})
 
 module.exports = {
 	upload: upload,

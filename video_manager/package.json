@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "node ./bin/dev",
-    "prod": "NODE_ENV=production PORT=3333 node ./bin/prod"
+    "prod": "NODE_ENV=production PORT=3333 node ./bin/prod",
+    "pm2": "NODE_ENV=production PORT=3333 pm2 start ./bin/prod.js --name=\"video manager\""
   },
-  "dependencies": {
+  "dependencies": { 
     "body-parser": "~1.13.2",
     "cookie-parser": "~1.3.5",
     "debug": "~2.2.0",

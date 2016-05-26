@@ -5,3 +5,6 @@
 # back end 
 /video_manager/node_modules
 /video_manager/public/files/*
+
+# log 
+*.log

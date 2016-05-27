@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node ./bin/dev",
     "prod": "NODE_ENV=production PORT=3333 node ./bin/prod",
-    "pm2": "NODE_ENV=production PORT=3333 pm2 start ./bin/prod.js --name=\"video manager\""
+    "pm2": "NODE_ENV=production PORT=80 pm2 start ./bin/prod.js --name=\"video manager\""
   },
   "dependencies": { 
     "body-parser": "~1.13.2",

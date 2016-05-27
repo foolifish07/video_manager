@@ -2,6 +2,7 @@
 <template>
 
 <div class="container"  style="margin-top: 15px">
+<div class="col-md-offset-1 col-md-10">
 
   <video width="100%" controls="controls"class="center-block"
     v-bind:src="video.video_url" >
@@ -80,6 +81,7 @@
   </div>
 
 </div>
+</div>
 
 </template>
 
@@ -124,6 +126,11 @@
             rt.video_url = data.video_url;
           },
           function(data){
+            rt.video = data;
+            rt.video_url = data.video_url;
+            rt.can_manage = true;
+          },
+          function(data){
             router.go({ name: 'index' })
           },
           function(data){
@@ -142,7 +149,6 @@
             for(let i in data)
               tags.push( data[i] );
 
-            rt.can_manage = true;
           },
           function(data){
             tags.splice(0, tags.length);

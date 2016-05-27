@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --hot --inline --port 8888 --config build/webpack.dev.config.js",
-    "build": "webpack --progress --config build/webpack.prod.config.js"
+    "build": "webpack --progress --config build/webpack.prod.config.js",
+    
+    "mov": "node build/mov.js"
   },
   "repository": {
     "type": "git",

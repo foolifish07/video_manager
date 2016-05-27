@@ -13172,12 +13172,13 @@
 			base(url, method, data, status_function);
 		},
 
-		get_video: function get_video(hash, success, not_found, no_permission) {
+		get_video: function get_video(hash, success, can_manage, not_found, no_permission) {
 			var url = '/video/' + hash;
 			var method = 'get';
 			var data = {};
 			var status_function = {
 				success: success,
+				can_manage: can_manage,
 				not_found: not_found,
 				no_permission: no_permission
 			};
@@ -14728,6 +14729,10 @@
 	        rt.video = data;
 	        rt.video_url = data.video_url;
 	      }, function (data) {
+	        rt.video = data;
+	        rt.video_url = data.video_url;
+	        rt.can_manage = true;
+	      }, function (data) {
 	        router.go({ name: 'index' });
 	      }, function (data) {
 	        router.go({ name: 'index' });
@@ -14742,7 +14747,7 @@
 	        tags.splice(0, tags.length);
 	        for (var i in data) {
 	          tags.push(data[i]);
-	        }rt.can_manage = true;
+	        }
 	      }, function (data) {
 	        tags.splice(0, tags.length);
 	        // router.go({ name: 'index' });
@@ -14807,6 +14812,7 @@
 	// <template>
 	//
 	// <div class="container"  style="margin-top: 15px">
+	// <div class="col-md-offset-1 col-md-10">
 	//
 	//   <video width="100%" controls="controls"class="center-block"
 	//     v-bind:src="video.video_url" >
@@ -14885,6 +14891,7 @@
 	//   </div>
 	//
 	// </div>
+	// </div>
 	//
 	// </template>
 	//
@@ -14909,7 +14916,7 @@
 /* 48 */
 /***/ function(module, exports) {
 
-	module.exports = "\n\n<div class=\"container\"  style=\"margin-top: 15px\">\n\n  <video width=\"100%\" controls=\"controls\"class=\"center-block\"\n    v-bind:src=\"video.video_url\" >\n  </video>\n  <!--embed src=\"http://yuntv.letv.com/bcloud.swf\" allowFullScreen=\"true\" quality=\"high\"  width=\"640\" height=\"360\" align=\"middle\" allowScriptAccess=\"always\" flashvars=\"uu=vhrrkr9rtg&vu=1310d79733&auto_play=1&gpcflag=1&width=640&height=360\" type=\"application/x-shockwave-flash\"></embed-->\n  <div class=\"video-info\">\n    <div>\n      <label class=\"lead\">{{ video.name }} </label> \n      <small> upload on {{ new Date(Date.parse(video.upload_time )) }}</small>\n      By\n      <Strong>  {{ video.creator.name }}</strong>\n      <a class=\"btn btn-primary btn-sm pull-right\" \n        v-bind:href=\" '/api/video/download/' + video.storage_name\"> download </a>\n    </div>\n    <label>watched: {{ video.watched_times }} times,\n          download: {{  video.download_times }} times\n     </label>\n\n  </div>\n\n  <div style=\"margin-top: 15px\" v-show=\"can_manage\">\n    <h3> Manage panel </h3>\n    <table class=\"table\" style=\"margin-top: 15px\">\n      <tbody>\n        <tr>\n          <th>Name</th>\n          <th>{{ video.name }}</th>\n          <th>\n            <input type=\"text\" placeholder=\"new name\" v-model=\"new_name\">\n            <button class=\"btn btn-primary btn-sm\" \n              v-on:click=\"change_name\">change</button>\n          </th>\n        </tr>\n        <tr>\n          <th>Creator: </th>\n          <th>{{ video.creator.name }}({{ video.creator.email }})</th>\n        </tr>\n        <tr>\n          <th> Stats: </th>\n          <th>{{ video.is_public?'Public':'private' }}</th>\n          <th><button class=\"btn btn-primary btn-sm\" \n            v-on:click=\"change_state\">change</button></th>\n        </tr>\n        <tr>\n          <th>image url</th>\n          <th style=\"max-width: 200px; word-wrap: break-word;\">\n            {{ video.img_url?video.img_url:'No' }} </th>\n        </tr>\n        <tr>\n          <th>Watched: </th>\n          <th>{{ video.watched_times }}</th>\n        </tr>\n        <tr>\n          <th>Download: </th>\n          <th>{{ video.download_times }}</th>\n        </tr>\n        <tr>\n          <th>Tags:</th>\n          <th>\n            <template v-for=\"videotag in video.tags\" track-by=\"$index\">\n              <a class=\"label label-pill label-danger btn\" style=\"margin-right: 5px\"\n                v-on:click=\"delete_videotag(videotag)\" title=\"delete this tag\"> \n                {{ videotag.name }} </a>\n            </template>\n          </th>\n          <th>\n            <template v-for=\"tag in tags\" track-by=\"$index\">\n              <a class=\"label label-pill label-primary btn\" style=\"margin-right: 5px\"\n                v-on:click=\"add_videotag(tag)\" title=\"add this tag\"> \n                {{ tag.name }} </a>\n            </template> \n          </th>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n\n</div>\n\n";
+	module.exports = "\n\n<div class=\"container\"  style=\"margin-top: 15px\">\n<div class=\"col-md-offset-1 col-md-10\">\n\n  <video width=\"100%\" controls=\"controls\"class=\"center-block\"\n    v-bind:src=\"video.video_url\" >\n  </video>\n  <!--embed src=\"http://yuntv.letv.com/bcloud.swf\" allowFullScreen=\"true\" quality=\"high\"  width=\"640\" height=\"360\" align=\"middle\" allowScriptAccess=\"always\" flashvars=\"uu=vhrrkr9rtg&vu=1310d79733&auto_play=1&gpcflag=1&width=640&height=360\" type=\"application/x-shockwave-flash\"></embed-->\n  <div class=\"video-info\">\n    <div>\n      <label class=\"lead\">{{ video.name }} </label> \n      <small> upload on {{ new Date(Date.parse(video.upload_time )) }}</small>\n      By\n      <Strong>  {{ video.creator.name }}</strong>\n      <a class=\"btn btn-primary btn-sm pull-right\" \n        v-bind:href=\" '/api/video/download/' + video.storage_name\"> download </a>\n    </div>\n    <label>watched: {{ video.watched_times }} times,\n          download: {{  video.download_times }} times\n     </label>\n\n  </div>\n\n  <div style=\"margin-top: 15px\" v-show=\"can_manage\">\n    <h3> Manage panel </h3>\n    <table class=\"table\" style=\"margin-top: 15px\">\n      <tbody>\n        <tr>\n          <th>Name</th>\n          <th>{{ video.name }}</th>\n          <th>\n            <input type=\"text\" placeholder=\"new name\" v-model=\"new_name\">\n            <button class=\"btn btn-primary btn-sm\" \n              v-on:click=\"change_name\">change</button>\n          </th>\n        </tr>\n        <tr>\n          <th>Creator: </th>\n          <th>{{ video.creator.name }}({{ video.creator.email }})</th>\n        </tr>\n        <tr>\n          <th> Stats: </th>\n          <th>{{ video.is_public?'Public':'private' }}</th>\n          <th><button class=\"btn btn-primary btn-sm\" \n            v-on:click=\"change_state\">change</button></th>\n        </tr>\n        <tr>\n          <th>image url</th>\n          <th style=\"max-width: 200px; word-wrap: break-word;\">\n            {{ video.img_url?video.img_url:'No' }} </th>\n        </tr>\n        <tr>\n          <th>Watched: </th>\n          <th>{{ video.watched_times }}</th>\n        </tr>\n        <tr>\n          <th>Download: </th>\n          <th>{{ video.download_times }}</th>\n        </tr>\n        <tr>\n          <th>Tags:</th>\n          <th>\n            <template v-for=\"videotag in video.tags\" track-by=\"$index\">\n              <a class=\"label label-pill label-danger btn\" style=\"margin-right: 5px\"\n                v-on:click=\"delete_videotag(videotag)\" title=\"delete this tag\"> \n                {{ videotag.name }} </a>\n            </template>\n          </th>\n          <th>\n            <template v-for=\"tag in tags\" track-by=\"$index\">\n              <a class=\"label label-pill label-primary btn\" style=\"margin-right: 5px\"\n                v-on:click=\"add_videotag(tag)\" title=\"add this tag\"> \n                {{ tag.name }} </a>\n            </template> \n          </th>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n\n</div>\n</div>\n\n";
 
 /***/ },
 /* 49 */

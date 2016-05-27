@@ -19,7 +19,15 @@ var get_image = function(videoid, size, callback){
 
 	// data.data.img1;
 	letvcloud.image.get({video_id: videoid, size: size}, function(err, data){
-        return callback(err, data.data.img1);
+        if ( data && data.data && data.data.img1 ){
+            console.log(  'get image success.' )
+            callback(err, data.data.img1);
+        }
+        else {
+            console.log( 'get image fail.' );
+            //console.log( data );
+            callback(err, null);
+        }
     });
 }
 
@@ -42,7 +50,14 @@ var upload = function (name, path, callback) {
                 return callback(err);
             //callback(null, JSON.parse(body));
         });
-        return callback(err, data.data.video_id);
+        if ( data && data.data && data.data.video_id ){
+            console.log('upload videoid: '+ data.data.video_id );
+            callback(err, data.data.video_id);
+        }
+        else {
+            console.log('upload failed......');
+            callback(err, null); 
+        }
     });
 };
 /*

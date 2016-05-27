@@ -115,12 +115,13 @@ var video = {
 		base(url, method, data, status_function);
 	},
 
-	get_video: function(hash, success, not_found, no_permission){
+	get_video: function(hash, success, can_manage, not_found, no_permission){
 		var url = '/video/' + hash;
 		var method = 'get';
 		var data = {};
 		var status_function = {
 			success: success,
+			can_manage: can_manage,
 			not_found: not_found,
 			no_permission: no_permission,
 		}

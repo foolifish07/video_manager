@@ -66,33 +66,34 @@ router.post('/upload',
 			for(var i in req.videos){(function(){
 				var video = req.videos[i];
 
-				letvcloud.upload(
-					video.storage_name,
-					path.join(__dirname, '..', 'public', 'files', video.storage_name), 
-					function(err, videoid){
-						if( err ) {
-							console.log( 'NOt find file');
-						}
-						console.log( video.originalname );
+				try {
+					letvcloud.upload(
+						video.storage_name,
+						path.join(__dirname, '..', 'public', 'files', video.storage_name), 
+						function(err, videoid){
+							if( err ) {
+								console.log( 'NOt find file');
+							}
+							else {
+								console.log( video.originalname );
 
-						Video.newOne( 
-							video.storage_name,
-					 		video.originalname, 
-							req.session.user._id,
-							videoid,  
-							function(err, item){
-								if ( err ){
-									console.log('New video error!');
-								}
-							});
-						/*
-						letvcloud.get_image(videoid ,null ,function(err, img_url){
-							if ( err ) console.log('upload img error!');
-							console.log('img_url: ' + img_url);
-
+								Video.newOne( 
+									video.storage_name,
+							 		video.originalname, 
+									req.session.user._id,
+									videoid,  
+									function(err, item){
+										if ( err ){
+											console.log('New video error!');
+										}
+									});
+							}
+							
 						})
-						*/
-					})
+				}
+				catch(err) {
+					console.log(err);
+				}
 			}())}
 
 
@@ -125,24 +126,30 @@ router.route('/:name')
 						res.video = video;
 
 						if ( !video.img_url || video.img_url=='' ){
-							letvcloud.get_image(
-								video.videoid ,null ,
-								function(err, img_url){
-									if ( err ) console.log('upload img error!');
-									if ( img_url ){
-										console.log('img_url: ' + img_url);
-										Video.updateOne( 
-											req.params.name,
-											{ img_url: img_url },
-											function(err, video){
-												if ( err ) {
-													console.log('mongoose : update one err!');
-												}
-											});
-									}
-								})
-						}
 
+							try{
+								letvcloud.get_image(
+									video.videoid ,null ,
+									function(err, img_url){
+										if ( err ) console.log('upload img error!');
+										else {
+											if ( img_url && img_url!='' ){
+											Video.updateOne( 
+												req.params.name,
+												{ img_url: img_url },
+												function(err, video){
+													if ( err ) {
+														console.log('mongoose : update one err!');
+													}
+												});
+											}
+										}
+									})
+							}
+							catch(err){
+								console.log(err);
+							}
+						}
 						next();
 					}
 					else 
@@ -177,8 +184,10 @@ router.route('/:name')
 						console.log('mongoose : update one err!');
 					}
 				});
-
-			status.success(res, res.video); // return 
+			if ( res.can_manage )
+				res.json({status:'can_manage', data:res.video });
+			else 
+				status.success(res, res.video); // return 
 		})
 	.delete( 
 		function(req, res, next){
